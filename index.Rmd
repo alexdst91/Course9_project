@@ -1,0 +1,92 @@
+---
+title       : Course 9 project slides
+subtitle    : 
+author      : Alessandro Destefanis
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## To be done
+
+Scope of the project is the creation of a simple R Shiny application and the presentation of the application thanks to slides.
+
+Aim of the application is to perform an exploration analysis of the mtcars dataset.
+
+```{r }
+str(mtcars)
+```
+
+--- .class #id 
+
+## Code used 1
+
+Here's the code inside sidebarLayout() function in ui.R
+
+```{r eval=FALSE}
+sidebarPanel(
+        selectInput('x', 'X', choices = columns, selected = "wt"),
+        selectInput('y', 'Y', choices = columns, selected = "mpg"),
+        selectInput('color', 'Color', choices = columns, selected = "cyl"),
+        selectInput('facet_row', 'Facet Row', c(None = '.', columns), selected = "carb"),
+        selectInput('facet_col', 'Facet Column', c(None = '.', columns)),
+        helpText("In order to explore the dataset please select the variables you desire to be showed.")
+    ),
+    mainPanel(
+       plotlyOutput("carsPlot")
+```
+
+--- .class #id 
+
+## Code used 2
+
+Here's the code used to define the graph to be printed, inside server.R
+
+```{r eval=FALSE}
+output$carsPlot <- renderPlotly({
+    
+      p <- ggplot(mtcars, aes_string(x = input$x, y = input$y, color = input$color)) + geom_point()
+      facets <- paste(input$facet_row, '~', input$facet_col)
+      if (facets != '. ~ .')
+          p <- p + facet_grid(facets)
+      
+      ggplotly(p) %>% 
+          layout(height = input$plotHeight, autosize=TRUE)
+  })
+```
+
+--- .class #id 
+
+## The imput panel
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(shiny)
+library(plotly)
+
+data("mtcars")
+columns <- names(mtcars)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+  
+  sidebarLayout(
+    sidebarPanel(
+        selectInput('x', 'X', choices = columns, selected = "wt"),
+        selectInput('y', 'Y', choices = columns, selected = "mpg"),
+        selectInput('color', 'Color', choices = columns, selected = "cyl"),
+        selectInput('facet_row', 'Facet Row', c(None = '.', columns), selected = "carb"),
+        selectInput('facet_col', 'Facet Column', c(None = '.', columns)),
+        helpText("In order to explore the dataset please select the variables you desire to be showed.")
+    ),
+    
+    # Show a plot of the generated distribution
+    mainPanel(
+       plotlyOutput("carsPlot")
+    )
+  )
+))
+```
